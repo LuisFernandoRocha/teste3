@@ -1,0 +1,232 @@
+﻿@model teste3.Models.Moeda
+@{
+    ViewData["Title"] = "Moeda";
+}
+
+<h2>Moeda</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Moeda">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-block btn-primary btn-salvar"> Salvar</button>
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-danger btn-block btn-excluir">Excluir</button>
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-block  btn-success btn-novo">Novo</button>
+                </div>
+            </div>
+       
+            <div class="form-group">
+                <label asp-for="Codigo" class="control-label">Código</label>
+                <input id="codigo" asp-for="Codigo" class="form-control" />
+                <span asp-validation-for="Codigo" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Descricao" class="control-label">Descrição</label>
+                <input id="descricao" asp-for="Descricao" class="form-control" />
+                <span asp-validation-for="Descricao" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Abreviatura" class="control-label"></label>
+                <input id="abreviatura" asp-for="Abreviatura" class="form-control" />
+                <span asp-validation-for="Abreviatura" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Cotacao" class="control-label">Cotação</label>
+                <input id="cotacao" asp-for="Cotacao" class="form-control" />
+                <span asp-validation-for="Cotacao" class="text-danger"></span>
+            </div>
+           
+        </form>
+
+
+    </div>
+</div>
+<style>
+    .botoes-items {
+        display: inline-block;
+    }
+
+    .botoes {
+        text-align: center;
+    }
+</style>
+<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+<script>
+
+    @section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+    $(() => {
+        $(document).on("click", ".btn-salvar", function () {           
+            let codigo = document.getElementById("codigo").value;
+            let cotacao = document.getElementById("cotacao").value;
+            if (codigo == 0) {
+                Swal.fire({
+                    title: 'Favor digitar o codigo!',
+                    cancelButtonText: "Cancelar",
+                    cancelButtonColor: '#d33',                 
+                })
+            } else if (cotacao == 0) {
+                Swal.fire({
+                    title: 'Favor digitar a Cotação!',
+                    cancelButtonText: "Cancelar",
+                    cancelButtonColor: '#d33',
+                })
+            }else {
+            Swal.fire({
+                title: 'Seu Código será Incluído !',
+                text: "Você não poderá reverter isso!",
+                icon: 'Atenção',
+                showCancelButton: true,
+                cancelButtonText: "Cancelar",
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sim, Incluir!'
+            }).then((result) => {
+                if (result.value) {
+                    Salvar(codigo)
+                }
+            })
+            }
+        });
+    });
+  
+    function Salvar(codigo) {
+        debugger;
+        $.ajax({
+            url: "../Home/Salvar",
+            data: {
+                codigo: codigo,
+                descricao: document.getElementById("descricao").value,
+                abreviatura: document.getElementById("abreviatura").value,
+                cotacao: document.getElementById("cotacao").value,
+            },
+            method: "POST",
+            beforeSend: function () {
+            },
+            success: function (data) {
+                console.log(data);
+                if (data.sucesso) {
+                    Swal.fire(
+                        'Incluido!',
+                        'Seu arquivo foi Incluido..',
+                        'Sucesso',
+                    )
+                    elemento.fadeOut(500, function () {
+                        $(this).remove();
+                    });
+                } else {
+                    Swal.fire(
+                        'Não foi possivel incluir!',
+                        'Codigo = ' + codigo + ' , Já existe.',
+                    )
+                    elemento.fadeOut(500, function () {
+                        $(this).remove();
+                    });
+                }
+            },
+            complete: function () {
+            }
+        });
+    }
+    $(() => {
+        $(document).on("click", ".btn-novo", function () {
+            let id = document.getElementById("codigo").value;
+            Novo(id)
+        });
+    });
+    function Novo(id) {
+        $.ajax({
+            url: "../Home/Novo",
+            data: {
+                id: id
+            },
+            method: "POST",
+            beforeSend: function () {
+            },
+            success: function (retorno) {
+                document.getElementById("codigo").value = retorno.mensagem;
+                document.getElementById("descricao").value = "";
+                document.getElementById("abreviatura").value = "";
+                document.getElementById("cotacao").value = "";
+            },
+            complete: function () {
+            }
+        });
+    }
+    $(() => {
+        $(document).on("click", ".btn-excluir", function () {
+            let codigo = document.getElementById("codigo").value;
+            if (codigo == 0) {
+                Swal.fire({
+                    title: 'Digitar Código para exclusão !',
+                    cancelButtonText: "Cancelar",
+                    cancelButtonColor: '#d33',
+                })
+            }else{
+                Swal.fire({
+                    title: 'Atenção Código ' + codigo + " Será Excluido",
+                    text: "Você não poderá reverter isso!",
+                    icon: 'Atenção',
+                    showCancelButton: true,
+                    cancelButtonText: "Cancelar",
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sim, Excluir!!'
+                }).then((result) => {
+                    if (result.value) {
+                        Excluir(codigo)
+                    }
+                })
+            }
+        });
+    });
+    function Excluir(codigo) {
+        let elemento = $(document).find("tr[data-codigo='" + codigo + "']");
+        $.ajax({
+            url: "../Home/Excluir",
+            data: {
+                codigo: codigo
+            },
+            method: "POST",
+            beforeSend: function () {
+            },
+            success: function (data) {
+                console.log(data);
+                if (data.sucesso) {
+                    Swal.fire(
+                        'Excluído!',
+                        'Seu arquivo foi deletado..',
+                        'Sucesso',
+                    )
+                    elemento.fadeOut(500, function () {
+                        $(this).remove();
+                    });
+                    document.getElementById("codigo").value = "";
+                    document.getElementById("descricao").value = "";
+                    document.getElementById("abreviatura").value = "";
+                    document.getElementById("cotacao").value = "";
+                } else {
+                    Swal.fire(
+                        'Não foi possivel a exclusão!',
+                        'Codigo = ' + codigo + ' , Não existe.',
+                    )
+                    elemento.fadeOut(500, function () {
+                        $(this).remove();
+                    });
+
+                }
+            },
+            complete: function () {
+            }
+        });
+
+    }
+</script>
